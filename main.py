@@ -14,19 +14,10 @@ load_dotenv()
 
 class Client:
 
-    def __init__(self):
-        self.session = self.init_session()
-
-    @staticmethod
-    def init_session():
-        s = requests.Session()
-        # HKPL cert cannot be verified
-        s.verify = False
-        return s
+    def __init__(self, session: requests.Session):
+        self.session = session
 
     def login(self, username, password):
-        # Use a new session for a new login
-        self.session = self.init_session()
         url = 'https://www.hkpl.gov.hk/tc/login.html'
         r = self.session.get(url)
         assert r.status_code == 200
@@ -60,10 +51,12 @@ class Client:
 
 
 def main():
-    client = Client()
     username = os.environ['HKPL_USERNAME']
     password = os.environ['HKPL_PASSWORD']
     while True:
+        session = requests.Session()
+        session.verify = False
+        client = Client(session)
         client.login(username, password)
         text = client.read_checkout()
         # with open('temp.html', 'w', encoding='utf-8') as f:
