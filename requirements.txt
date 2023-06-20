@@ -1,0 +1,7 @@
+requests
+icecream
+loguru
+bs4
+lxml
+python-dotenv
+urllib3
