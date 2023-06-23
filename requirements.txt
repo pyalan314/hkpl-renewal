@@ -9,3 +9,5 @@ aiohttp
 aiofiles
 fake-useragent
 python-telegram-bot==13.15
+schedule
+tenacity
