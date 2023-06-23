@@ -19,20 +19,13 @@ class Client:
     async def login(self, username, password):
         url = 'https://www.hkpl.gov.hk/tc/login.html'
         async with self.session.get(url) as r:
-            assert r.status == 200
+            common.validate_home_resp(r)
 
         url = 'https://www.hkpl.gov.hk/iw/login.php'
         data = common.prepare_login_data(username, password)
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         async with self.session.post(url, data=data, allow_redirects=False, headers=headers) as r:
-            # ic(dict(r.request.headers))
-            # ic(r.request.body)
-            # ic(r.url)
-            # ic(r.status_code)
-            # ic(dict(r.headers))
-            logger.debug(r.cookies)
-            assert r.status == 302
-            assert 'SMSESSION' in r.cookies
+            common.validate_login_resp()
 
     async def read_checkout(self):
         url = 'https://webcat.hkpl.gov.hk/wicket/bookmarkable/com.vtls.chamo.webapp.component.patron.PatronAccountPage?theme=WEB&locale=zh_TW'
@@ -45,9 +38,7 @@ class Client:
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         # ic(dict(self.session.cookies))
         async with self.session.post(url, data=data, allow_redirects=False, headers=headers) as r:
-            logger.debug(r.status)
-            logger.debug(r.headers)
-            assert r.status == 302
+            common.validate_renew_resp(r)
 
 
 async def main():

@@ -1,7 +1,11 @@
 from collections import namedtuple
 from datetime import datetime, date
+from typing import Union
 
+import requests
+from aiohttp import ClientResponse
 from bs4 import BeautifulSoup
+from loguru import logger
 
 Record = namedtuple('Record', ['name', 'due_date', 'times', 'value'])
 Page = namedtuple('Page', ['form_id', 'action', 'records', 'valid_records'])
@@ -67,3 +71,40 @@ def parse_check_out(html):
         records=records,
         valid_records=valid_records,
     )
+
+
+def handle_aiohttp_response(r: Union[requests.Response, ClientResponse]):
+    if isinstance(r, ClientResponse):
+        r.status_code = r.status
+
+
+def validate_home_resp(r: Union[requests.Response, ClientResponse]):
+    handle_aiohttp_response(r)
+    if r.status_code != 200:
+        raise ValueError(f'home status == {r.status_code}')
+
+
+def validate_login_resp(r: Union[requests.Response, ClientResponse]):
+    handle_aiohttp_response(r)
+    # ic(dict(r.request.headers))
+    # ic(r.request.body)
+    # ic(r.url)
+    # ic(r.status_code)
+    # ic(dict(r.headers))
+    logger.debug(dict(r.cookies))
+    assert r.status_code == 302
+    assert 'SMSESSION' in r.cookies
+    if r.status_code != 302:
+        raise ValueError(f'login status == {r.status_code}')
+    if 'SMSESSION' not in r.cookies:
+        raise ValueError(f'No SMSESSION in login cookies')
+
+
+def validate_renew_resp(r: Union[requests.Response, ClientResponse]):
+    handle_aiohttp_response(r)
+    if isinstance(r, requests.Response):
+        logger.debug(r.request.body)
+    logger.debug(r.status_code)
+    logger.debug(r.headers)
+    if r.status_code != 302:
+        raise ValueError(f'renew status == {r.status_code}')

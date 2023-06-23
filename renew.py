@@ -18,22 +18,16 @@ class Client:
         self.session = session
 
     def login(self, username, password):
+        logger.debug('login')
         url = 'https://www.hkpl.gov.hk/tc/login.html'
         r = self.session.get(url)
-        assert r.status_code == 200
+        common.validate_login_resp(r)
 
         url = 'https://www.hkpl.gov.hk/iw/login.php'
         data = common.prepare_login_data(username, password)
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         r = self.session.post(url, data=data, allow_redirects=False, headers=headers)
-        # ic(dict(r.request.headers))
-        # ic(r.request.body)
-        # ic(r.url)
-        # ic(r.status_code)
-        # ic(dict(r.headers))
-        logger.debug(dict(self.session.cookies))
-        assert r.status_code == 302
-        assert 'SMSESSION' in r.cookies
+        common.validate_login_resp(r)
 
     def read_checkout(self):
         r = self.session.get('https://webcat.hkpl.gov.hk/wicket/bookmarkable/com.vtls.chamo.webapp.component.patron.PatronAccountPage?theme=WEB&locale=zh_TW')
@@ -45,10 +39,7 @@ class Client:
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         # ic(dict(self.session.cookies))
         r = self.session.post(url, data=data, allow_redirects=False, headers=headers)
-        logger.debug(r.request.body)
-        logger.debug(r.status_code)
-        logger.debug(r.headers)
-        assert r.status_code == 302
+        common.validate_renew_resp(r)
 
 
 def main():
