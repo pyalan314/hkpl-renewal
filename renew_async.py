@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from loguru import logger
 
 import common
+import notify
 
 load_dotenv()
 
@@ -44,24 +45,24 @@ class Client:
 async def main():
     username = os.environ['HKPL_USERNAME']
     password = os.environ['HKPL_PASSWORD']
-    while True:
-        conn = aiohttp.TCPConnector(ssl=False)
-        async with aiohttp.ClientSession(connector=conn) as session:
-            client = Client(session)
-            await client.login(username, password)
-            text = await client.read_checkout()
-            async with aiofiles.open('temp2.html', 'w', encoding='utf-8') as f:
-                await f.write(text)
-            async with aiofiles.open('temp2.html', 'r', encoding='utf-8') as f:
-                text = await f.read()
-            page = common.parse_check_out(text)
-            logger.info(page)
-            if page.valid_records:
-                logger.info(f'Renew {"|".join(x.name for x in page.valid_records)}')
-                await client.renew(page.form_id, page.action, [x.value for x in page.valid_records])
-            else:
-                logger.info('No valid record')
-            await asyncio.sleep(60)
+    conn = aiohttp.TCPConnector(ssl=False)
+    async with aiohttp.ClientSession(connector=conn) as session:
+        client = Client(session)
+        await client.login(username, password)
+        text = await client.read_checkout()
+        # async with aiofiles.open('temp2.html', 'w', encoding='utf-8') as f:
+        #     await f.write(text)
+        # async with aiofiles.open('temp2.html', 'r', encoding='utf-8') as f:
+        #     text = await f.read()
+        page = common.parse_check_out(text)
+        logger.info(page)
+        if page.valid_records:
+            logger.info(f'Renew {"|".join(x.name for x in page.valid_records)}')
+            notify.send_renew_action(page.valid_records)
+            await client.renew(page.form_id, page.action, [x.value for x in page.valid_records])
+        else:
+            logger.info('No valid record')
+            notify.send_no_action(page.records)
 
 
 if __name__ == '__main__':

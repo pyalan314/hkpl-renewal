@@ -8,3 +8,4 @@ urllib3
 aiohttp
 aiofiles
 fake-useragent
+python-telegram-bot==13.15
