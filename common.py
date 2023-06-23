@@ -1,5 +1,5 @@
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, date
 
 from bs4 import BeautifulSoup
 
@@ -8,6 +8,8 @@ Page = namedtuple('Page', ['form_id', 'action', 'records', 'valid_records'])
 
 
 def prepare_login_data(username, password):
+    assert username
+    assert password
     data = {
         'USER': username,
         'PASSWORD': password,
@@ -23,6 +25,8 @@ def prepare_login_data(username, password):
 
 
 def prepare_renew_data(form_id, book_values):
+    assert form_id
+    assert book_values
     data = {
         f'{form_id}_hf_0': '',
         'renewalCheckboxGroup:checkoutsTable:topToolbars:toolbars:1:span:pageSize:sizeChoice': 0,
@@ -55,7 +59,8 @@ def parse_check_out(html):
         )
 
     records = [parse_row(x) for x in rows if len(x.find_all('td')) > 1]
-    valid_records = [x for x in records if x.value]
+    # TODO handle expired case
+    valid_records = [x for x in records if x.value and x.due_date == date.today()]
     return Page(
         form_id=form['id'],
         action=form['action'],

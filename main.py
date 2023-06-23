@@ -45,6 +45,7 @@ class Client:
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         # ic(dict(self.session.cookies))
         r = self.session.post(url, data=data, allow_redirects=False, headers=headers)
+        logger.debug(r.request.body)
         logger.debug(r.status_code)
         logger.debug(r.headers)
         assert r.status_code == 302
@@ -59,15 +60,15 @@ def main():
         client = Client(session)
         client.login(username, password)
         text = client.read_checkout()
-        # with open('temp.html', 'w', encoding='utf-8') as f:
-        #     f.write(text)
-        # with open('temp.html', 'r', encoding='utf-8') as f:
-        #     text = f.read()
+        with open('temp.html', 'w', encoding='utf-8') as f:
+            f.write(text)
+        with open('temp.html', 'r', encoding='utf-8') as f:
+            text = f.read()
         page = common.parse_check_out(text)
         logger.info(page)
         if page.valid_records:
             logger.info(f'Renew {"|".join(x.name for x in page.valid_records)}')
-            # client.renew(page.form_id, page.action, [x.value for x in page.valid_records])
+            client.renew(page.form_id, page.action, [x.value for x in page.valid_records])
         else:
             logger.info('No valid record')
         time.sleep(60)

@@ -67,7 +67,7 @@ async def main():
             logger.info(page)
             if page.valid_records:
                 logger.info(f'Renew {"|".join(x.name for x in page.valid_records)}')
-                # await client.renew(page.form_id, page.action, [x.value for x in page.valid_records])
+                await client.renew(page.form_id, page.action, [x.value for x in page.valid_records])
             else:
                 logger.info('No valid record')
             await asyncio.sleep(60)
