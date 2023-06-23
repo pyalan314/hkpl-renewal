@@ -21,7 +21,7 @@ class Client:
         logger.debug('login')
         url = 'https://www.hkpl.gov.hk/tc/login.html'
         r = self.session.get(url)
-        common.validate_login_resp(r)
+        common.validate_home_resp(r)
 
         url = 'https://www.hkpl.gov.hk/iw/login.php'
         data = common.prepare_login_data(username, password)

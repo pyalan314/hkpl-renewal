@@ -25,7 +25,7 @@ class Client:
         data = common.prepare_login_data(username, password)
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         async with self.session.post(url, data=data, allow_redirects=False, headers=headers) as r:
-            common.validate_login_resp()
+            common.validate_login_resp(r)
 
     async def read_checkout(self):
         url = 'https://webcat.hkpl.gov.hk/wicket/bookmarkable/com.vtls.chamo.webapp.component.patron.PatronAccountPage?theme=WEB&locale=zh_TW'

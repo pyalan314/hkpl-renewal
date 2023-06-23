@@ -92,8 +92,6 @@ def validate_login_resp(r: Union[requests.Response, ClientResponse]):
     # ic(r.status_code)
     # ic(dict(r.headers))
     logger.debug(dict(r.cookies))
-    assert r.status_code == 302
-    assert 'SMSESSION' in r.cookies
     if r.status_code != 302:
         raise ValueError(f'login status == {r.status_code}')
     if 'SMSESSION' not in r.cookies:
