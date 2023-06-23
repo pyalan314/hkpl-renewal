@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from loguru import logger
 
 import common
-import notify
+import notification
 
 load_dotenv()
 
@@ -58,11 +58,11 @@ async def main():
         logger.info(page)
         if page.valid_records:
             logger.info(f'Renew {"|".join(x.name for x in page.valid_records)}')
-            notify.send_renew_action(page.valid_records)
+            notification.send_renew_action(page.valid_records)
             await client.renew(page.form_id, page.action, [x.value for x in page.valid_records])
         else:
             logger.info('No valid record')
-            notify.send_no_action(page.records)
+            notification.send_no_action(page.records)
 
 
 if __name__ == '__main__':

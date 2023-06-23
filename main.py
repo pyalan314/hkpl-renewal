@@ -6,7 +6,7 @@ from loguru import logger
 from requests import RequestException
 from tenacity import retry, retry_if_exception_type, stop_after_delay, wait_fixed, RetryCallState
 
-import notify
+import notification
 import renew
 
 
@@ -18,7 +18,7 @@ def safe(exit_on_failure=False):
                 job_func(*args, **kwargs)
             except Exception as e:
                 logger.exception(e)
-                notify.send_fail(e)
+                notification.send_fail(e)
                 if exit_on_failure:
                     exit()
             else:
