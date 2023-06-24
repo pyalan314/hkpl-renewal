@@ -12,7 +12,7 @@ BOT_TOKEN = os.environ['HKPL_BOT_TOKEN']
 service = get_notifier('telegram')
 
 
-def notify(msg, formatted=True):
+def notify(msg, formatted=False):
     if formatted:
         msg = f"`{msg}`"
     response = service.notify(
@@ -27,7 +27,7 @@ def send_no_action(records: list[Record]):
     msg = [
         'No due items',
         '-' * 10,
-        *(f'{x.due_date} | {x.name}' for x in records)
+        *(x.short() for x in records),
     ]
     notify('\n'.join(msg))
 
@@ -36,7 +36,7 @@ def send_renew_action(records: list[Record]):
     msg = [
         'Renew items',
         '-' * 10,
-        *(f'{x.due_date} | {x.name}' for x in records)
+        *(x.short() for x in records),
     ]
     notify('\n'.join(msg))
 

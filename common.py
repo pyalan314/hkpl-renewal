@@ -1,5 +1,5 @@
-from collections import namedtuple
 from datetime import datetime, date
+from typing import NamedTuple
 from typing import Union
 
 import requests
@@ -7,8 +7,29 @@ from aiohttp import ClientResponse
 from bs4 import BeautifulSoup
 from loguru import logger
 
-Record = namedtuple('Record', ['name', 'due_date', 'times', 'value'])
-Page = namedtuple('Page', ['form_id', 'action', 'records', 'valid_records'])
+
+class Record(NamedTuple):
+    name: str
+    due_date: date
+    times: int
+    value: str
+
+    def is_valid(self):
+        return self.value and self.due_date == date.today() and self.times <= 5
+
+    def short(self):
+        return f'{self.due_date.strftime("%m/%d")} | {self.name:.15}'
+
+
+class Page(NamedTuple):
+    form_id: str
+    action: str
+    records: list[Record]
+
+    @property
+    def valid_records(self) -> list[Record]:
+        # TODO handle expired case
+        return [x for x in self.records if x.is_valid()]
 
 
 def prepare_login_data(username, password):
@@ -59,17 +80,14 @@ def parse_check_out(html):
             name=cols[1].text.strip()[:20],
             due_date=datetime.strptime(cols[4].text.strip(), '%Y-%m-%d').date(),
             value=value,
-            times=cols[5].text.strip().split(' ')[0]
+            times=int(cols[5].text.strip().split(' ')[0])
         )
 
     records = [parse_row(x) for x in rows if len(x.find_all('td')) > 1]
-    # TODO handle expired case
-    valid_records = [x for x in records if x.value and x.due_date == date.today()]
     return Page(
         form_id=form['id'],
         action=form['action'],
         records=records,
-        valid_records=valid_records,
     )
 
 
